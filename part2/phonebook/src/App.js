@@ -1,17 +1,19 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Filter } from './components/Filter';
 import { PersonForm } from './components/PersonForm';
 import { Persons } from './components/Persons';
+import axios from 'axios';
 
 const App = () => {
-  const personDB = [
-    { name: 'Arto Hellas', number: '040-123456', id: 1 },
-    { name: 'Ada Lovelace', number: '39-44-5323523', id: 2 },
-    { name: 'Dan Abramov', number: '12-43-234345', id: 3 },
-    { name: 'Mary Poppendieck', number: '39-23-6423122', id: 4 },
-  ];
+  const getPersons = () => {
+    axios
+      .get('http://localhost:3001/persons')
+      .then((response) => setPersons(response.data));
+  };
 
-  const [persons, setPersons] = useState(personDB);
+  useEffect(getPersons, []);
+
+  const [persons, setPersons] = useState([]);
   const [newName, setNewName] = useState('');
   const [number, setNumber] = useState('');
   const [filter, setFilter] = useState('');
@@ -22,14 +24,10 @@ const App = () => {
 
   const handleSearch = (event) => {
     setFilter(event.target.value);
-    if (filter === '') {
-      setPersons(personDB);
-    } else {
-      const filteredPersons = personDB.filter((person) =>
-        person.name.toLowerCase().includes(event.target.value.toLowerCase())
-      );
-      setPersons(filteredPersons);
-    }
+    const filteredPersons = persons.filter((person) =>
+      person.name.toLowerCase().includes(event.target.value.toLowerCase())
+    );
+    setPersons(filteredPersons);
   };
 
   const addName = (event) => {
