@@ -1,9 +1,9 @@
 import '../index.css';
 
-export const Notification = ({ message }) => {
-  if (message === null) {
+export const Notification = ({ message, error }) => {
+  if (message === null && error === null) {
     return null;
   }
-
-  return <div className="notification">{message}</div>;
+  if (message) return <div className="notification">{message}</div>;
+  if (error) return <div className="error">{error}</div>;
 };

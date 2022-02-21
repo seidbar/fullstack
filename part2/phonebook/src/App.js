@@ -11,10 +11,12 @@ const App = () => {
   const [number, setNumber] = useState('');
   const [filter, setFilter] = useState('');
   const [notification, setNotification] = useState(null);
+  const [error, setError] = useState(null);
 
   const getPeople = () => {
     phoneService.getAll().then((people) => setPeople(people));
   };
+  useEffect(getPeople, []);
 
   const addPerson = (person) => {
     phoneService.create(person).then((response) => {
@@ -26,16 +28,27 @@ const App = () => {
   const deletePerson = (person) => {
     const confirm = window.confirm(`Delete ${person.name}`);
     if (confirm) {
-      phoneService.remove(person.id).then((res) => {
-        res && setPeople(people.filter((p) => p.id !== person.id));
-      });
+      phoneService
+        .remove(person.id)
+        .then((res) => {
+          res && setPeople(people.filter((p) => p.id !== person.id));
+        })
+        .catch(() => handleRemoval(person));
     }
   };
 
-  useEffect(getPeople, []);
-
   const handleChange = (setter) => (event) => {
     setter(event.target.value);
+  };
+
+  const notify = (message) => {
+    setNotification(message);
+    setTimeout(() => setNotification(null), 5000);
+  };
+
+  const notifyError = (message) => {
+    setError(message);
+    setTimeout(() => setError(null), 5000);
   };
 
   const handleSearch = (event) => {
@@ -46,28 +59,37 @@ const App = () => {
     setPeople(filteredPersons);
   };
 
+  const handleRemoval = (person) => {
+    notifyError(
+      `Information of ${person.name} has already been removed from the server`
+    );
+    setPeople(people.filter((p) => p.id !== person.id));
+  };
+
   const addName = (event) => {
+    const newPerson = { name: newName, number: number };
     event.preventDefault();
     const found = people.find((entry) => entry.name === newName);
-    console.log({ found });
     if (found) {
       const confirm = window.confirm(
         `${newName} was already added to the phonebook, replace old number with a new one?`
       );
       if (confirm) {
         phoneService
-          .update(found.id, { name: newName, number: number })
-          .then((returnedPerson) =>
+          .update(found.id, newPerson)
+          .then((returnedPerson) => {
             setPeople(
               people.map((person) =>
                 person.id !== found.id ? person : returnedPerson
               )
-            )
-          );
+            );
+            notify(`Successfully changed number for ${newName}`);
+          })
+          .catch(() => handleRemoval(found));
       }
     } else {
-      addPerson({ name: newName, number: number });
-      setNotification('Successfully added ');
+      addPerson(newPerson);
+      notify(`Successfully added ${newName}`);
     }
     setNewName('');
     setNumber('');
@@ -76,7 +98,7 @@ const App = () => {
   return (
     <div>
       <h2>Phonebook</h2>
-      <Notification message={notification} />
+      <Notification message={notification} error={error} />
       <Filter filter={filter} handleSearch={handleSearch} />
       <h2>add a new</h2>
       <PersonForm
