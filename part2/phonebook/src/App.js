@@ -67,6 +67,7 @@ const App = () => {
       }
     } else {
       addPerson({ name: newName, number: number });
+      setNotification('Successfully added ');
     }
     setNewName('');
     setNumber('');
