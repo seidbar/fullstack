@@ -3,12 +3,14 @@ import { Filter } from './components/Filter';
 import { PersonForm } from './components/PersonForm';
 import { People } from './components/People';
 import phoneService from './services/phonenumbers';
+import { Notification } from './components/Notification';
 
 const App = () => {
   const [people, setPeople] = useState([]);
   const [newName, setNewName] = useState('');
   const [number, setNumber] = useState('');
   const [filter, setFilter] = useState('');
+  const [notification, setNotification] = useState(null);
 
   const getPeople = () => {
     phoneService.getAll().then((people) => setPeople(people));
@@ -73,6 +75,7 @@ const App = () => {
   return (
     <div>
       <h2>Phonebook</h2>
+      <Notification message={notification} />
       <Filter filter={filter} handleSearch={handleSearch} />
       <h2>add a new</h2>
       <PersonForm
