@@ -25,8 +25,11 @@ const App = () => {
       .then((response) => {
         const newPeople = [...people];
         setPeople(newPeople.concat(response));
+        notify(`Successfully added ${newName}`);
       })
-      .catch((error) => notifyError(error));
+      .catch((error) => {
+        notifyError(error.response.data.error);
+      });
   };
 
   const deletePerson = (person) => {
@@ -93,7 +96,6 @@ const App = () => {
       }
     } else {
       addPerson(newPerson);
-      /* notify(`Successfully added ${newName}`); */
     }
     setNewName('');
     setNumber('');
